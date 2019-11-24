@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">GrayBot</string>
+    <string name="title">GrayBot</string>
+    <string name="subtitle">The Ultimate Crawler</string>
+    <string name="title_activity_home_page">HomePage</string>
+    <string name="title_home">YouTube</string>
+    <string name="title_dashboard">Google News</string>
+    <string name="title_notifications">About</string>
+    <string name="search">YouTube Search</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
+    <string name="listItem">TITLE / AUTHOR</string>
+    <string name="listtime">0:00</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

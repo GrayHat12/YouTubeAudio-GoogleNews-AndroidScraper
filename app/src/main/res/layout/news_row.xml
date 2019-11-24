@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/gradient_splash"
+    android:orientation="horizontal"
+    android:padding="5dip" >
+
+    <!--  ListRow Left sied Thumbnail image -->
+    <LinearLayout android:id="@+id/thumbnail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="3dip"
+        android:layout_alignParentStart="true"
+        android:background="@drawable/image_bg"
+        android:layout_marginEnd="5dip">
+
+        <ImageView
+            android:id="@+id/list_imageG"
+            android:layout_width="50dip"
+            android:layout_height="50dip"/>
+
+    </LinearLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/thumbnail"
+        android:layout_marginStart="10dp">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_gravity="start"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/titleG"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="60dp"
+                android:layout_height="wrap_content"
+                android:text="@string/listItem"
+                android:textColor="#fff"
+                android:typeface="sans"
+                android:textSize="15sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/artistG"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#abbedb"
+                android:textSize="12sp"
+                android:layout_marginTop="1dip"
+                android:text="@string/listItem" />
+        </LinearLayout>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_alignParentEnd="true"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/durationG"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="@string/listtime"
+                android:layout_marginEnd="5dip"
+                android:textSize="12sp"
+                android:textColor="#10bcc9"
+                android:textStyle="bold"/>
+        </RelativeLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

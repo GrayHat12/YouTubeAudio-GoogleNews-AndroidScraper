@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/youtube"
+        android:title="YOUTUBE"
+        android:icon="@drawable/music"/>
+    <item android:id="@+id/googlenews"
+        android:title="GOOGLE NEWS"
+        android:icon="@drawable/news" />
+    <item android:id="@+id/aboutus"
+        android:title="ABOUT US"
+        android:icon="@drawable/about"/>
+</menu>
