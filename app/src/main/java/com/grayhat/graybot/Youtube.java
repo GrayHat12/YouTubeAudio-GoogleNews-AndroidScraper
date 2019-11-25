@@ -199,7 +199,7 @@ public class Youtube extends Fragment {
         textTitle.setText(TITLE);
         textArtist.setText(AUTHOR);
         if(Player.mediaPlayer == null)
-        {}
+        { }
         else
         {
             if(Player.mediaPlayer.isPlaying())
