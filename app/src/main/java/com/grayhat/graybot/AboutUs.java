@@ -59,7 +59,7 @@ public class AboutUs extends Fragment {
         website.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openBrowser(getContext(),"https://grayhat12.github.io/old/index.html");
+                openBrowser(getContext(),"https://grayhat12.github.io/YouTubeAudio-GoogleNews-AndroidScraper/");
             }
         });
         Picasso.get()

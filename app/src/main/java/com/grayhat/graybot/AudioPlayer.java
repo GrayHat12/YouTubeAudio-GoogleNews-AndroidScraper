@@ -67,6 +67,7 @@ public class AudioPlayer extends AppCompatActivity {
         if(Player.mediaPlayer==null)
             return;
         Player.mediaPlayer.setLooping(!Player.mediaPlayer.isLooping());
+        Toast.makeText(this,"Repeat "+(Player.mediaPlayer.isLooping()?"on":"off"),Toast.LENGTH_SHORT).show();
     }
 
     public void runb(View view) {

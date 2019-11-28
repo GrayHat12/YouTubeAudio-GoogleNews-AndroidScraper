@@ -19,6 +19,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/searchView"
+                android:focusedByDefault="false"
+                android:defaultFocusHighlightEnabled="false"
                 android:queryHint="Search"/>
             <ListView
                 android:layout_width="match_parent"

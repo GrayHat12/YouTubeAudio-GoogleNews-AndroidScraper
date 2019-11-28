@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -20,14 +21,18 @@ import androidx.fragment.app.Fragment;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestHandle;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
@@ -41,11 +46,15 @@ public class Youtube extends Fragment {
     private View fragmentView;
     ListView listView;
     private AsyncHttpClient client;
+    List<String> prevListList;
     LazyAdapter adapter;
     ArrayList<HashMap<String, String>> videoList ;
     String TITLE,AUTHOR,IMAGE,AUDIO,VIDEO,DURATION,DURATIONSECS;
     ImageView imageThumb,imagePlay;
     TextView textTitle,textArtist;
+    boolean flagLoading=false;
+    String Mainquery=null;
+    RequestHandle requestHandle;
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -81,6 +90,7 @@ public class Youtube extends Fragment {
         if(fragmentView!=null)
             return fragmentView;
         fragmentView = inflater.inflate(R.layout.fragment_youtube, container, false);
+        prevListList = new LinkedList<>();
         searchView = fragmentView.findViewById(R.id.searchView);
         listView = fragmentView.findViewById(R.id.listView);
         imageThumb = fragmentView.findViewById(R.id.current_image);
@@ -102,8 +112,18 @@ public class Youtube extends Fragment {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                Mainquery = query;
                 try {
-                    makeSearch(query,10);
+                    if(flagLoading)
+                    {
+                        try{
+                            requestHandle.cancel(true);
+                        }catch (Exception ex)
+                        {
+                            ex.printStackTrace();
+                        }
+                    }
+                    makeSearch(query,10,0);
                 }
                 catch (Exception ex)
                 {
@@ -133,6 +153,32 @@ public class Youtube extends Fragment {
                 {
                     Player.mediaPlayer.start();
                     imagePlay.setImageResource(R.drawable.pause);
+                }
+            }
+        });
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if(flagLoading)
+                {
+                    return;
+                }
+                if(Mainquery==null)
+                {
+                    return;
+                }
+                if(firstVisibleItem+visibleItemCount == totalItemCount && totalItemCount!=0)
+                {
+                    try {
+                        makeSearch(Mainquery,5,1);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -245,7 +291,7 @@ public class Youtube extends Fragment {
             Player.mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                 @Override
                 public boolean onError(MediaPlayer mp, int what, int extra) {
-                    Toast.makeText(getContext(),"Media Player encountered some error "+what,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(),"Loading Media "+what,Toast.LENGTH_SHORT).show();
                     return false;
                 }
             });
@@ -261,16 +307,27 @@ public class Youtube extends Fragment {
         }
     }
 
-    private void makeSearch(String search, int i) throws Exception {
-        videoList = new ArrayList<HashMap<String, String>>();
+    private void makeSearch(String search, int i,int more) throws Exception {
+        flagLoading = true;
+        if(more==0) {
+            videoList = new ArrayList<HashMap<String, String>>();
+            prevListList = new LinkedList<>();
+        }
         JSONObject jsonParams = new JSONObject();
         jsonParams.put("search", search);
-        jsonParams.put("items", "10");
+        jsonParams.put("items", i);
+        jsonParams.put("more",more);
+        JSONArray prevParm = new JSONArray();
+        for(String p:prevListList)
+            prevParm.put(p);
+        jsonParams.put("prev",prevParm);
         StringEntity entity = new StringEntity(jsonParams.toString());
+        System.out.println("PARAMETERS:\n"+prevParm.toString());
         entity.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-        client.post(getContext(), "https://gray-server.herokuapp.com/youtube", entity, "application/json", new AsyncHttpResponseHandler() {
+        requestHandle = client.post(getContext(), "https://gray-server.herokuapp.com/youtube", entity, "application/json", new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                flagLoading = false;
                 String data=new String(responseBody);
                 Log.d("recievedData",data);
                 try {
@@ -281,6 +338,7 @@ public class Youtube extends Fragment {
                     while(keys.hasNext())
                     {
                         String key = keys.next();
+                        prevListList.add(key);
                         JSONObject link = dataObject.getJSONObject(key);
                         String author = link.getString("author").toString();
                         String category = link.getString("category").toString();
@@ -303,7 +361,7 @@ public class Youtube extends Fragment {
                         String vextnsion = video.getString("extension").toString();
                         String vsize = video.getString("size").toString();
                         String vurl = video.getString("url").toString();
-                        HashMap<String,String> map = new HashMap<>();
+                        HashMap<String,String> map=new HashMap<>();
                         map.put("TITLE",title);
                         map.put("YOUTUBE",key);
                         map.put("ARTIST",author);
@@ -331,6 +389,7 @@ public class Youtube extends Fragment {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                flagLoading=false;
                 Toast.makeText(getContext(),"Could not connect to server",Toast.LENGTH_SHORT).show();
             }
         });
