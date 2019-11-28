@@ -11,6 +11,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -67,7 +68,8 @@ public class AudioPlayer extends AppCompatActivity {
         if(Player.mediaPlayer==null)
             return;
         Player.mediaPlayer.setLooping(!Player.mediaPlayer.isLooping());
-        Toast.makeText(this,"Repeat "+(Player.mediaPlayer.isLooping()?"on":"off"),Toast.LENGTH_SHORT).show();
+        Snackbar.make(thumb,"Repeat "+(Player.mediaPlayer.isLooping()?"on":"off"),Snackbar.LENGTH_SHORT).show();
+        //Toast.makeText(this,"Repeat "+(Player.mediaPlayer.isLooping()?"on":"off"),Toast.LENGTH_SHORT).show();
     }
 
     public void runb(View view) {
@@ -96,7 +98,8 @@ public class AudioPlayer extends AppCompatActivity {
         }
         catch (Exception ex)
         {
-            Toast.makeText(this,"Something Wrong",Toast.LENGTH_SHORT).show();
+            Snackbar.make(thumb,"Something went wrong",Snackbar.LENGTH_LONG).show();
+            //Toast.makeText(this,"Something Wrong",Toast.LENGTH_SHORT).show();
             ex.printStackTrace();
         }
     }

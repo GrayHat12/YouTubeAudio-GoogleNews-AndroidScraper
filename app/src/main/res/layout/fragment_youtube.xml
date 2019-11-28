@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/gradient_splash"
     tools:context=".Youtube">
 
@@ -19,8 +20,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/searchView"
+                android:layout_margin="5dp"
                 android:focusedByDefault="false"
                 android:defaultFocusHighlightEnabled="false"
+                android:longClickable="true"
                 android:queryHint="Search"/>
             <ListView
                 android:layout_width="match_parent"

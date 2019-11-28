@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
@@ -94,6 +95,7 @@ public class GoogleNews extends Fragment {
                 return false;
             }
         });
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -167,7 +169,8 @@ public class GoogleNews extends Fragment {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                Toast.makeText(getContext(),"Could not connect to server",Toast.LENGTH_SHORT).show();
+                Snackbar.make(listView,"Could not connect to server. Try again later",Snackbar.LENGTH_LONG).show();
+                //Toast.makeText(getContext(),"Could not connect to server",Toast.LENGTH_SHORT).show();
             }
         });
     }

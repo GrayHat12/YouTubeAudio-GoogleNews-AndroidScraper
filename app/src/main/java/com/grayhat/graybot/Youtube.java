@@ -1,11 +1,21 @@
 package com.grayhat.graybot;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.provider.Settings;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,10 +25,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestHandle;
@@ -33,6 +44,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
@@ -54,6 +66,8 @@ public class Youtube extends Fragment {
     TextView textTitle,textArtist;
     boolean flagLoading=false;
     String Mainquery=null;
+    SpeechRecognizer mSpeechRecognizer;
+    Intent speechRecognizerIntent;
     RequestHandle requestHandle;
 
     private static final String ARG_PARAM1 = "param1";
@@ -72,6 +86,22 @@ public class Youtube extends Fragment {
     }
 
     public Youtube() { }
+
+    private boolean checkPermission(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!(ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)) {
+                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.parse("package:" + context.getPackageName()));
+                startActivity(intent);
+            }
+        }
+        else
+        {
+            Snackbar.make(listView,"Upgrade Android version to use Voice Search",Snackbar.LENGTH_LONG).show();
+            return false;
+        }
+        return true;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -97,6 +127,58 @@ public class Youtube extends Fragment {
         imagePlay = fragmentView.findViewById(R.id.playPause);
         textTitle = fragmentView.findViewById(R.id.curtitle);
         textArtist = fragmentView.findViewById(R.id.Curartist);
+        mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(getContext());
+        speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        mSpeechRecognizer.setRecognitionListener(new RecognitionListener() {
+            @Override
+            public void onReadyForSpeech(Bundle params) {
+
+            }
+
+            @Override
+            public void onBeginningOfSpeech() {
+
+            }
+
+            @Override
+            public void onRmsChanged(float rmsdB) {
+
+            }
+
+            @Override
+            public void onBufferReceived(byte[] buffer) {
+
+            }
+
+            @Override
+            public void onEndOfSpeech() {
+
+            }
+
+            @Override
+            public void onError(int error) {
+
+            }
+
+            @Override
+            public void onResults(Bundle results) {
+                ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                if(matches!=null)
+                    searchView.setQuery(matches.get(0),true);
+            }
+
+            @Override
+            public void onPartialResults(Bundle partialResults) {
+
+            }
+
+            @Override
+            public void onEvent(int eventType, Bundle params) {
+
+            }
+        });
         if(Player.mediaPlayer!=null)
         {
             if(Player.mediaPlayer.isPlaying())
@@ -219,6 +301,31 @@ public class Youtube extends Fragment {
         return fragmentView;
     }
 
+    private boolean voiceSearch() {
+        Snackbar.make(searchView,"Voice Search",Snackbar.LENGTH_SHORT).show();
+        boolean perm = checkPermission(getContext());
+        if(!perm)
+            return false;
+        if(Player.mediaPlayer==null)
+        {
+            mSpeechRecognizer.startListening(speechRecognizerIntent);
+        }
+        else
+        {
+            if(Player.mediaPlayer.isPlaying())
+            {
+                Player.mediaPlayer.pause();
+                mSpeechRecognizer.startListening(speechRecognizerIntent);
+                Player.mediaPlayer.start();
+            }
+            else
+            {
+                mSpeechRecognizer.startListening(speechRecognizerIntent);
+            }
+        }
+        return true;
+    }
+
     HashMap<String, String> CMapData;
 
     private void play(HashMap<String, String> mapdata) {
@@ -286,12 +393,14 @@ public class Youtube extends Fragment {
             catch (Exception err)
             {
                 err.printStackTrace();
-                Toast.makeText(getContext(),"Unable to load media.\nTry again Later",Toast.LENGTH_LONG).show();
+                Snackbar.make(listView,"Unable to load media. Try again Later",Snackbar.LENGTH_SHORT).show();
+                //Toast.makeText(getContext(),"Unable to load media.\nTry again Later",Toast.LENGTH_LONG).show();
             }
             Player.mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                 @Override
                 public boolean onError(MediaPlayer mp, int what, int extra) {
-                    Toast.makeText(getContext(),"Loading Media "+what,Toast.LENGTH_SHORT).show();
+                    Snackbar.make(listView,"Loading Media "+what,Snackbar.LENGTH_SHORT).show();
+                    //Toast.makeText(getContext(),"Loading Media "+what,Toast.LENGTH_SHORT).show();
                     return false;
                 }
             });
@@ -390,7 +499,8 @@ public class Youtube extends Fragment {
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                 flagLoading=false;
-                Toast.makeText(getContext(),"Could not connect to server",Toast.LENGTH_SHORT).show();
+                Snackbar.make(listView,"Could not connect to server",Snackbar.LENGTH_SHORT).show();
+                //Toast.makeText(getContext(),"Could not connect to server",Toast.LENGTH_SHORT).show();
             }
         });
     }
