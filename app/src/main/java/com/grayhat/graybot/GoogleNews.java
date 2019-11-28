@@ -76,6 +76,11 @@ public class GoogleNews extends Fragment {
         client.setResponseTimeout(60*1000);
         client.setEnableRedirects(true);
         searchView.setSubmitButtonEnabled(true);
+        try {
+            makeSearch("GB#HOME");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
