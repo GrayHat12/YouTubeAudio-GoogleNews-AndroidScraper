@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -62,6 +63,16 @@ public class GoogleNews extends Fragment {
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        try {
+            makeSearch("GB#HOME");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
@@ -76,11 +87,6 @@ public class GoogleNews extends Fragment {
         client.setResponseTimeout(60*1000);
         client.setEnableRedirects(true);
         searchView.setSubmitButtonEnabled(true);
-        try {
-            makeSearch("GB#HOME");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
